@@ -4,5 +4,5 @@ pip install keras
 pip install tensorflow
 pip install gym[all]
 pip install pyglet==1.2.4
-
+pip install jupyter
 
