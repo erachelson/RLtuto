@@ -1,9 +1,9 @@
 import numpy as np
 import torch
 import torch.nn as nn
-import gym
+import gymnasium as gym
 
-cartpole = gym.make('CartPole-v1')
+cartpole = gym.make('CartPole-v1', render_mode="rgb_array")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -31,7 +31,7 @@ class DQN_agent:
         self.total_steps = 0
         self.model = model 
         self.criterion = torch.nn.MSELoss()
-        self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=config['learning_rate'])
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=config['learning_rate'])
     
     def gradient_step(self):
         if len(self.memory) > self.batch_size:
@@ -48,7 +48,7 @@ class DQN_agent:
         episode_return = []
         episode = 0
         episode_cum_reward = 0
-        state = env.reset()
+        state, _ = env.reset()
         epsilon = self.epsilon_max
         step = 0
 
@@ -64,7 +64,7 @@ class DQN_agent:
                 action = greedy_action(self.model, state)
 
             # step
-            next_state, reward, done, _ = env.step(action)
+            next_state, reward, done, _, _ = env.step(action)
             self.memory.append(state, action, reward, next_state, done)
             episode_cum_reward += reward
 
@@ -102,11 +102,11 @@ agent = DQN_agent(config, DQN)
 scores = agent.train(cartpole, 200)
 plt.plot(scores)
 
-x = cartpole.reset()
+x, _ = cartpole.reset()
 cartpole.render()
 for i in range(1000):
     a = greedy_action(DQN, x)
-    y, _, d, _ = cartpole.step(a)
+    y, _, d, _, _ = cartpole.step(a)
     cartpole.render()
     x=y
     if d:
